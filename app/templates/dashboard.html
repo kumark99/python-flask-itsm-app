@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tachometer-alt me-2"></i>Incident Dashboard</h2>
+    <a href="{{ url_for('main.new_incident') }}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>New Incident</a>
+</div>
+
+{% if current_user.role == 'Admin' and stats %}
+<div class="row mb-4">
+    <!-- Total Tickets -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Tickets</h5>
+                <h1 class="display-4">{{ stats.total }}</h1>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Priority Breakdown -->
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">Priority</div>
+            <ul class="list-group list-group-flush">
+                {% for p, count in stats.by_priority.items() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ p }} <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">Status</div>
+            <ul class="list-group list-group-flush">
+                {% for s, count in stats.by_status.items() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ s }} <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">Category</div>
+            <ul class="list-group list-group-flush">
+                {% for c, count in stats.by_category.items() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ c }} <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Agent Workload -->
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white">Agent Workload</div>
+            <ul class="list-group list-group-flush">
+                {% for a, count in stats.by_agent.items() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ a }} <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Top Requesters -->
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white">Top Requesters</div>
+            <ul class="list-group list-group-flush">
+                {% for u, count in stats.by_user.items() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ u }} <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Ticket Age (Open) -->
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">Open Ticket Age</div>
+            <ul class="list-group list-group-flush">
+                {% for bucket, count in stats.age.items() %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ bucket }} <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('main.index') }}" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control" placeholder="Search by title..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in ['General', 'Hardware', 'Software', 'Network', 'Access'] %}
+                    <option value="{{ cat }}" {% if filter_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    {% for stat in ['Open', 'In Progress', 'Resolved', 'Closed'] %}
+                    <option value="{{ stat }}" {% if filter_status == stat %}selected{% endif %}>{{ stat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="priority" class="form-select">
+                    <option value="">All Priorities</option>
+                    {% for prio in ['Low', 'Medium', 'High', 'Critical'] %}
+                    <option value="{{ prio }}" {% if filter_priority == prio %}selected{% endif %}>{{ prio }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="d-grid gap-2 d-md-block">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filter</button>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Created By</th>
+                        <th>Assigned To</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for incident in incidents %}
+                    <tr>
+                        <td>#{{ incident.id }}</td>
+                        <td>{{ incident.title }}</td>
+                        <td><span class="badge bg-secondary">{{ incident.category }}</span></td>
+                        <td>
+                            <span class="badge bg-{% if incident.status == 'Open' %}danger{% elif incident.status == 'In Progress' %}warning{% elif incident.status == 'Resolved' %}success{% else %}secondary{% endif %}">
+                                {{ incident.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if incident.priority == 'Critical' %}danger{% elif incident.priority == 'High' %}warning{% else %}info{% endif %}">
+                                {{ incident.priority }}
+                            </span>
+                        </td>
+                        <td>{{ incident.author.username }}</td>
+                        <td>{{ incident.assignee.username if incident.assignee else 'Unassigned' }}</td>
+                        <td>{{ incident.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <a href="{{ url_for('main.incident', incident_id=incident.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">No incidents found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if pagination %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mt-4">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=pagination.prev_num, q=search_query, status=filter_status, priority=filter_priority, category=filter_category) }}">Previous</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.index', page=page_num, q=search_query, status=filter_status, priority=filter_priority, category=filter_category) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=pagination.next_num, q=search_query, status=filter_status, priority=filter_priority, category=filter_category) }}">Next</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
