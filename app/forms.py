@@ -32,5 +32,6 @@ class IncidentForm(FlaskForm):
     category = SelectField('Category', choices=[('General', 'General'), ('Hardware', 'Hardware'), ('Software', 'Software'), ('Network', 'Network'), ('Access', 'Access')], default='General')
     priority = SelectField('Priority', choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High'), ('Critical', 'Critical')], default='Medium')
     status = SelectField('Status', choices=[('Open', 'Open'), ('In Progress', 'In Progress'), ('Resolved', 'Resolved'), ('Closed', 'Closed')], default='Open')
+    comments = TextAreaField('Agent Comments')
     assigned_to = SelectField('Assign To', coerce=int, choices=[]) # Populated dynamically
     submit = SubmitField('Submit')

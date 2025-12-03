@@ -38,6 +38,7 @@ def create_incident():
             description=data['description'],
             category=data.get('category', 'General'),
             priority=data.get('priority', 'Medium'),
+            comments=data.get('comments'),
             author=user
         )
         db.session.add(incident)
@@ -65,6 +66,8 @@ def update_incident(id):
             incident.status = data['status']
         if 'priority' in data:
             incident.priority = data['priority']
+        if 'comments' in data:
+            incident.comments = data['comments']
         if 'assigned_to_id' in data:
             incident.assigned_to_id = data['assigned_to_id']
 

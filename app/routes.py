@@ -100,6 +100,10 @@ def new_incident():
         if form.validate_on_submit():
             incident = Incident(title=form.title.data, description=form.description.data,
                                 category=form.category.data, priority=form.priority.data, author=current_user)
+            
+            if current_user.role in ['Agent', 'Admin']:
+                incident.comments = form.comments.data
+
             if form.assigned_to.data != 0:
                 incident.assigned_to_id = form.assigned_to.data
             
@@ -137,6 +141,7 @@ def incident(incident_id):
             incident.status = form.status.data
             
             if current_user.role in ['Agent', 'Admin']:
+                incident.comments = form.comments.data
                 if form.assigned_to.data != 0:
                     incident.assigned_to_id = form.assigned_to.data
                 else:
@@ -151,6 +156,7 @@ def incident(incident_id):
             form.category.data = incident.category
             form.priority.data = incident.priority
             form.status.data = incident.status
+            form.comments.data = incident.comments
             form.assigned_to.data = incident.assigned_to_id if incident.assigned_to_id else 0
 
         return render_template('incident_form.html', title='Incident Details', form=form, legend='Incident Details', incident=incident)

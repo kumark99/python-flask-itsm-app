@@ -34,6 +34,7 @@ class Incident(db.Model):
     category = db.Column(db.String(50), default='General') # Hardware, Software, Network, Access, General
     status = db.Column(db.String(20), default='Open') # Open, In Progress, Resolved, Closed
     priority = db.Column(db.String(20), default='Medium') # Low, Medium, High, Critical
+    comments = db.Column(db.Text) # Agent/Admin comments
     created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -48,6 +49,7 @@ class Incident(db.Model):
             'category': self.category,
             'status': self.status,
             'priority': self.priority,
+            'comments': self.comments,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
             'created_by': self.author.username if self.author else None,
