@@ -36,8 +36,19 @@ with app.app_context():
         users.append(user)
         db.session.add(user)
     
+    # Create AI Users
+    ai_user = User(username='AI-User', email='ai-user@example.com', role='User')
+    ai_user.set_password('AI-User')
+    db.session.add(ai_user)
+    # users.append(ai_user) # Excluded from random incident generation
+
+    ai_agent = User(username='AI-SRE-Agent', email='ai-sre-agent@example.com', role='Agent')
+    ai_agent.set_password('AI-SRE-Agent')
+    db.session.add(ai_agent)
+    # agents.append(ai_agent) # Excluded from random assignment
+
     db.session.commit()
-    print("Users created: admin, 5 agents, 5 users")
+    print("Users created: admin, 5 agents, 5 users, AI-User, AI-SRE-Agent")
 
     # Sample Data Lists
     categories = ['Hardware', 'Software', 'Network', 'Access', 'General']
